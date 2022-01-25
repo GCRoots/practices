@@ -5,9 +5,12 @@ import java.io.Serializable;
 //Serializable:序列化接口
 public class Student implements Serializable {
 
+    private static final long serialVersionUID =123L;
+
     private String sid;
     private String name;
-    private String age;
+//    private String age;
+    private transient String age; //不序列化
     private String addrerss;
 
     public Student() {
