@@ -1,4 +1,4 @@
-package reflection_09.classLoader;
+package reflect_09.classLoader;
 
 public class ClassLoaderDemo {
     public static void main(String[] args) {
