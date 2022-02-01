@@ -1,0 +1,2 @@
+className=reflect_09.reflect.pojo.Student
+methodName=study

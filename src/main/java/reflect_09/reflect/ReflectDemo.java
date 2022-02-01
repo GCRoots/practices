@@ -1,12 +1,19 @@
 package reflect_09.reflect;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 public class ReflectDemo {
 
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException, IOException {
         //获取Class对象
         getClassDemo();
 
@@ -17,9 +24,31 @@ public class ReflectDemo {
         getFieldDemo();
 
         //获取成员方法
-        Class<?> aClass = Class.forName("reflect_09.reflect.Student");
+        getMethodDemo();
 
-        //获取所有public成员方法
+        //越过泛型检查
+        skipCheck();
+
+        //通过配置文件运行类中的方法
+        //加载数据
+        Properties properties=new Properties();
+        FileReader reader=new FileReader("src/main/java/reflect_09/reflect/class.txt");
+        properties.load(reader);
+        reader.close();
+
+        String className = properties.getProperty("className");
+        String methodName = properties.getProperty("methodName");
+
+        //通过反射使用
+        Class<?> aClass = Class.forName(className);
+        //获取无参构造方法
+        Constructor<?> con = aClass.getConstructor();
+        //通过反射获取对象
+        Object instance = con.newInstance();
+        //调用方法
+        Method method = aClass.getMethod(methodName);
+        method.invoke(instance);
+
 
     }
 
@@ -92,8 +121,8 @@ public class ReflectDemo {
         System.out.println("--------");
     }
 
+    //获取成员变量
     public static void getFieldDemo() throws ClassNotFoundException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        //获取成员变量
         Class<?> aClass = Class.forName("reflect_09.reflect.Student");
 
         //获取所有public成员变量
@@ -130,5 +159,91 @@ public class ReflectDemo {
         System.out.println(instance);
         System.out.println("--------");
     }
+
+    //获取成员方法
+    public static void getMethodDemo() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        Class<?> aClass = Class.forName("reflect_09.reflect.Student");
+
+        //获取所有public成员方法
+        Method[] methods = aClass.getMethods();
+        for (Method method:methods){
+            System.out.println(method);
+        }
+        /*
+         * public void reflect_09.reflect.Student.method3()
+         * public void reflect_09.reflect.Student.method2()
+         * public void reflect_09.reflect.Student.method1()
+         *
+         * 同时获得所有父类以及实现的接口中的public方法
+         * public java.lang.String reflect_09.reflect.Student.toString()
+         * public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException
+         * public final native void java.lang.Object.wait(long) throws java.lang.InterruptedException
+         * public final void java.lang.Object.wait() throws java.lang.InterruptedException
+         * public boolean java.lang.Object.equals(java.lang.Object)
+         * public native int java.lang.Object.hashCode()
+         * public final native java.lang.Class java.lang.Object.getClass()
+         * public final native void java.lang.Object.notify()
+         * public final native void java.lang.Object.notifyAll()
+         */
+        System.out.println("--------");
+
+        //获取所有成员方法
+        Method[] methods1 = aClass.getDeclaredMethods();
+        for (Method method:methods1){
+            System.out.println(method);
+        }
+        /* 仅本类的方法
+         * public java.lang.String reflect_09.reflect.Student.toString()
+         * private void reflect_09.reflect.Student.function()
+         * public void reflect_09.reflect.Student.method1()
+         * public void reflect_09.reflect.Student.method2()
+         * public void reflect_09.reflect.Student.method3()
+         */
+        System.out.println("--------");
+
+        //获取某个public成员方法
+        Method method1 = aClass.getMethod("method1");
+        //获取无参构造方法
+        Constructor<?> con = aClass.getConstructor();
+        //通过反射获取对象
+        Object instance = con.newInstance();
+        //public Object invoke(Object obj, Object... args)
+        //Object：返回值类型
+        //Object obj：调用方法的对象
+        //Object... args：方法需要的参数
+        method1.invoke(instance);
+        Method method2 = aClass.getMethod("method2", String.class);
+        method2.invoke(instance,"林青霞");
+        Method method3 = aClass.getMethod("method3", String.class, int.class);
+        method3.invoke(instance,"林青霞",24);
+
+        System.out.println("--------");
+
+        //获取任意成员方法
+        Method function = aClass.getDeclaredMethod("function");
+        //暴力反射 取消访问检查
+        function.setAccessible(true);
+        function.invoke(instance);
+        System.out.println("--------");
+    }
+
+    //越过泛型检查
+    public static void skipCheck() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        ArrayList<Integer> list=new ArrayList<>();
+        list.add(10);
+        list.add(20);
+        list.add(30);
+        System.out.println(list); // [10, 20, 30]
+
+        Class<? extends ArrayList> aClass = list.getClass();
+        Method add = aClass.getMethod("add", Object.class);
+        add.invoke(list,"hello");
+        add.invoke(list,"world");
+        System.out.println(list); // [10, 20, 30, hello, world]
+
+        System.out.println("--------");
+
+    }
+
 
 }

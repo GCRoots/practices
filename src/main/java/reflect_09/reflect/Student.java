@@ -32,12 +32,12 @@ public class Student {
         System.out.println("method1");
     }
 
-    public void method2(){
-        System.out.println("method2");
+    public void method2(String name){
+        System.out.println("method2:"+name);
     }
 
-    public void method3(){
-        System.out.println("method3");
+    public void method3(String name,int age){
+        System.out.println("method3:"+name+","+age);
     }
 
     @Override
